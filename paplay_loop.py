@@ -107,7 +107,7 @@ class paplay:
         self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
-        self.playbuff[self.start_channel-1:self.nchannel,0:self.nframe] = np.frombuffer(self.wf_out.readframes(self.chunk), dtype=self.format_np)
+        self.playbuff[self.start_channel-1:self.nchannel,:] = np.frombuffer(self.wf_out.readframes(self.chunk), dtype=self.format_np)
         pa_outdata = (self.playbuff.T).reshape((self.chunk*self.nchannel,1))
         self.ifrm = self.ifrm+1
         if self.ifrm == int(np.ceil(self.nframe/self.chunk)):
