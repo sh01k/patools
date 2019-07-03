@@ -6,7 +6,7 @@ import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
 
-class rec:
+class parec:
     def __init__(self,nchannel=1,Fs=44100):
         self.chunk = 512 #length of chunk for pyaudio
         self.format = pyaudio.paInt16 #format
@@ -29,9 +29,9 @@ class rec:
             self.usage()
             return
 
-    def start(self, filename, duration):
-        self.wf = wave.open(filename, 'wb')
         self.pa = pyaudio.PyAudio()
+
+        # Open stream
         self.stream = self.pa.open(format=self.format,
                               channels=self.nchannel,
                               rate=self.Fs,
@@ -39,14 +39,14 @@ class rec:
                               frames_per_buffer=self.chunk,
                               stream_callback=self.callback)
 
+    def start(self, filename, duration):
+        self.wf = wave.open(filename, 'wb')
+
         self.pa_indata = []
         self.stream.start_stream()
-        print("Recording...\n")
+        print("Recording...")
         time.sleep(duration)
-
         self.stream.stop_stream()
-        self.stream.close()
-        self.pa.terminate()
 
         self.wf.setparams((self.nchannel, self.pa.get_sample_size(self.format), self.Fs, int(duration*self.Fs), 'NONE', 'not compressed'))
         self.wf.writeframesraw(b''.join(self.pa_indata))
@@ -54,10 +54,14 @@ class rec:
 
         return 0
 
+    def terminate(self):
+        self.stream.close()
+        self.pa.terminate()
+
     def callback(self, in_data, frame_count, time_info, status):
         self.pa_indata.append(in_data)
         return(None, pyaudio.paContinue)
 
 if __name__== '__main__':
-    rec = rec(2)
-    rec.start("rec_test.wav",10)
+    pr = parec(2)
+    pr.start("rec_test.wav",10)
