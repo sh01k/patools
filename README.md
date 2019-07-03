@@ -1,6 +1,6 @@
 patools
 ====
 ## Description
-A basic python scripts for record and play audio by using pyaudio.
+Basic python scripts for record and play audio by using pyaudio.
 [pyaudio](https://people.csail.mit.edu/hubert/pyaudio/), and [numpy](http://www.numpy.org/) are required.
 
