@@ -67,6 +67,7 @@ class paplay:
 
         self.ifrm = 0
         self.pa_indata = []
+        self.playbuff = np.zeros((self.nchannel,self.chunk), dtype=self.format_np)
 
         # Open stream
         if self.dev_id<0:
@@ -95,10 +96,6 @@ class paplay:
         return 0
 
     def start(self):
-        playbuff = np.zeros((self.nchannel,self.nframe), dtype=self.format_np)
-        playbuff[self.start_channel-1:self.nchannel,0:self.nframe] = np.frombuffer(self.wf_out.readframes(self.nframe), dtype=self.format_np)
-        self.playdata = (playbuff.T).reshape((self.nframe*self.nchannel,1))
-
         self.ifrm = 0
         self.stream.start_stream()
 
@@ -110,9 +107,11 @@ class paplay:
         self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
-        pa_outdata = self.playdata[self.ifrm*self.nchannel*self.chunk:(self.ifrm+1)*self.nchannel*self.chunk]
+        self.playbuff[self.start_channel-1:self.nchannel,0:self.nframe] = np.frombuffer(self.wf_out.readframes(self.chunk), dtype=self.format_np)
+        pa_outdata = (self.playbuff.T).reshape((self.chunk*self.nchannel,1))
         self.ifrm = self.ifrm+1
         if self.ifrm == int(np.ceil(self.nframe/self.chunk)):
+            self.wf_out.rewind()
             self.ifrm = 0
         return (pa_outdata, pyaudio.paContinue)
 
