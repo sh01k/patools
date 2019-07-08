@@ -133,10 +133,7 @@ class paplay:
         self.flg_stop = 1
 
 if __name__== '__main__':
-    #pap = paplay("../SoundFieldSynthesizer/src/tests/created_multi_maracas.wav",5,dev_id=2)
-    pap = paplay("../SoundFieldSynthesizer/src/tests/created_multi_white.wav",5,dev_id=2)
-    #pap = paplay("../SoundFieldSynthesizer/src/tests/created_single.wav",5,dev_id=2)
-    #pap = paplay("./test/tsp_out.wav",1)
+    pap = paplay("./test/tsp_out.wav",1)
 
     w_th1 = threading.Thread(target=pap.waitstream)
     w_th2 = threading.Thread(target=pap.waitkey)
