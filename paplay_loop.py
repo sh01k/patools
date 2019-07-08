@@ -35,14 +35,19 @@ class paplay:
         # Format
         if self.format == pyaudio.paInt16:
             self.format_np = np.int16
+            self.nbyte = 2
         elif self.format == pyaudio.paInt32:
             self.format_np = np.int32
+            self.nbyte = 4
         elif self.format == pyaudio.paInt8:
             self.format_np = np.int8
+            self.nbyte = 1
         elif self.format == pyaudio.paUInt8:
             self.format_np = np.uint8
+            self.nbyte = 1
         elif self.format == pyaudio.paFloat32:
             self.format_np = np.float32
+            self.nbyte = 4
         else:
             print("Invalid format")
             self.usage()
@@ -107,7 +112,9 @@ class paplay:
         self.pa.terminate()
 
     def callback(self, in_data, frame_count, time_info, status):
-        self.playbuff[self.start_channel-1:self.nchannel,:] = np.frombuffer(self.wf_out.readframes(self.chunk), dtype=self.format_np)
+        data = self.wf_out.readframes(self.chunk)
+        cur_nframes = int(len(data)/self.n_out_channel/self.nbyte)
+        self.playbuff[self.start_channel-1:self.nchannel,0:cur_nframes] = np.frombuffer(data, dtype=self.format_np).reshape(cur_nframes, self.n_out_channel).T
         pa_outdata = (self.playbuff.T).reshape((self.chunk*self.nchannel,1))
         self.ifrm = self.ifrm+1
         if self.ifrm == int(np.ceil(self.nframe/self.chunk)):
@@ -126,7 +133,7 @@ class paplay:
         self.flg_stop = 1
 
 if __name__== '__main__':
-    pap = paplay("tsp_out.wav",2)
+    pap = paplay("./test/tsp_out.wav",1)
 
     w_th1 = threading.Thread(target=pap.waitstream)
     w_th2 = threading.Thread(target=pap.waitkey)
